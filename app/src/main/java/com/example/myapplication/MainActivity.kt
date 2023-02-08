@@ -5,7 +5,9 @@ import android.os.Bundle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -13,23 +15,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //PRODUCER
-        val flow = flow<String> {
+        //PRODUCER, the flow just infers that we are emitting an Int so we don't have to write flow<Int>
+        val flow = flow {
             for(i in 1..10) {
-                emit("Hello World!")
+                emit(i)
                 delay(1000L)
             }
         }
 
         //CONSUMER,
         GlobalScope.launch{
-            // You can also pass a parameter in .buffer() as how much you want to carry in the buffer, in bytes. 
-            flow.buffer().collect {//consumes in a different coroutine than the producer
+            //filter is a lambda function, using booleans
+            flow.buffer().filter {
+                it % 2 == 0
+            }.map {
+                it * it
+            }.collect {
                 println(it)
                 delay(2000L)
             }
         }
 
-        //Output: "Hello World" is printed every 2 seconds because producer/consumer are in the different coroutines.
+        //Output: Filter takes all the even numbers. Map squares them. Collect prints them (the squares of even numbers).
+        //Just like lists, flows also use filter and map
     }
 }
