@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //PRODUCER, flow must be of the <type> you are EMITTING
+        //PRODUCER
         val flow = flow<String> {
             for(i in 1..10) {
                 emit("Hello World!")
@@ -21,17 +21,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //CONSUMER, must be launched in coroutine. By default, producer/consumer use same coroutine.
+        //CONSUMER,
         GlobalScope.launch{
-            flow.collect {
+            // You can also pass a parameter in .buffer() as how much you want to carry in the buffer, in bytes. 
+            flow.buffer().collect {//consumes in a different coroutine than the producer
                 println(it)
                 delay(2000L)
             }
         }
 
-        //Output: "Hello World" is printed every 3 seconds because producer/consumer are in the same coroutine.
-        // Other Info:
-        // "Back pressure": server sends more data than client can process -> Flows make sure Producer only gives data to Consumer when Consumer can process it.
-
+        //Output: "Hello World" is printed every 2 seconds because producer/consumer are in the different coroutines.
     }
 }
